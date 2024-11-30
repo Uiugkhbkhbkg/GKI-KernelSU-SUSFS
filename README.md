@@ -11,3 +11,7 @@ By flashing this kernel, **YOU** are choosing to make these modifications. If so
 ---
 
 ### Proceed at your own risk!
+
+/nInstallation instructions:
+/nYou can flash this kernel with the open source Kernel Flasher app.
+/nhttps://github.com/capntrips/KernelFlasher
