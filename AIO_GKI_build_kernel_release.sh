@@ -208,15 +208,14 @@ build_config() {
     cd ../AnyKernel3
     ZIP_NAME="AnyKernel3-${ANDROID_VERSION}-${KERNEL_VERSION}.${SUB_LEVEL}_${DATE}.zip"
     echo "Creating zip file: $ZIP_NAME..."
-    zip -r "../$ZIP_NAME" ./*
-    cd ../
+    zip -r "../../$ZIP_NAME" ./*
+    cd ../../
 
     # Group the zip file by Android and Kernel version
     RELEASE_ZIPS["$ANDROID_VERSION-$KERNEL_VERSION.$SUB_LEVEL"]+="./$ZIP_NAME "
 
     # Delete the $CONFIG folder after building
     echo "Deleting $CONFIG folder..."
-    cd ..
     rm -rf "$CONFIG"
 }
 
