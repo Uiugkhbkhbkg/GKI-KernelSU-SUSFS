@@ -70,6 +70,11 @@ declare -A RELEASE_ZIPS=()
 build_config() {
     CONFIG=$1
     CONFIG_DETAILS=${CONFIG}
+
+    # Create a directory named after the current configuration
+    echo "Creating folder for configuration: $CONFIG..."
+    mkdir -p "$CONFIG"
+    cd "$CONFIG"
     
     # Split the config details into individual components
     IFS="-" read -r ANDROID_VERSION KERNEL_VERSION SUB_LEVEL DATE <<< "$CONFIG_DETAILS"
@@ -211,6 +216,7 @@ build_config() {
 
     # Delete the $CONFIG folder after building
     echo "Deleting $CONFIG folder..."
+    cd ..
     rm -rf "$CONFIG"
 }
 
