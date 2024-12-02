@@ -55,6 +55,8 @@ Flashing this kernel will void your warranty, and there is always a risk of bric
 ### Google
 + Pixel 8
 + Pixel 8 Pro
+### Samsung
++ Galaxy S22
 ### Xiaomi 
 + Redmi K60
 + 13 Pro
