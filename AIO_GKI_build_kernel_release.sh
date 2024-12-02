@@ -22,14 +22,8 @@ cd "$ROOT_DIR"
 
 # Array with configurations (e.g., android-version-kernel-version-date)
 BUILD_CONFIGS=(
-    "android12-5.10-198-2024-01"
-    "android12-5.10-205-2024-03"
-    "android12-5.10-209-2024-05"
-    "android12-5.10-218-2024-08"
     "android12-5.10-66-2022-09"
-    
-    #"android15-6.6-30-2024-08"
-)
+    )
 
 
 # Arrays to store generated zip files, grouped by androidversion-kernelversion
