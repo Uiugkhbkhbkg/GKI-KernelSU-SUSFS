@@ -41,9 +41,9 @@ jobs:
     # Set up GitHub CLI with GH_TOKEN
     - name: Set up GitHub CLI
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.NEURAX }}
       run: |
         gh auth login --with-token <<EOF
-        ${{ secrets.GITHUB_TOKEN }}
+        ${{ secrets.NEURAX }}
         EOF
         gh release create "GKI Kernels With KernelSU & SUSFS"
