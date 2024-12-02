@@ -61,7 +61,9 @@ Flashing this kernel will void your warranty, and there is always a risk of bric
 
 ---
 
-# If you need you kernel version added please let me know and I will build it!
+### If you need you kernel version added please let me know and I will build it!
+
+https://t.me/TheWildJames
 
 # Confirmed Working Devices
 ### Google
