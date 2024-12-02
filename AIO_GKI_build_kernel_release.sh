@@ -217,8 +217,7 @@ echo "Creating GitHub release: $RELEASE_NAME..."
 gh release create "$TAG_NAME" "${ZIP_FILES[@]}" \
     --repo "$REPO_OWNER/$REPO_NAME" \
     --title "$RELEASE_NAME" \
-    --notes "$RELEASE_NOTES" \
-    --token "$GH_TOKEN"  # Ensure the token is used here
+    --notes "$RELEASE_NOTES"
 
 echo "GitHub release created with the following files:"
 printf '%s\n' "${ZIP_FILES[@]}"
