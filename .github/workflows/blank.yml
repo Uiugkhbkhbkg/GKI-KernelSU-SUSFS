@@ -14,6 +14,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    # Step to clean up disk space
+    - name: Clean up disk space
+      run: |
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /opt/ghc
+        sudo apt-get clean
+    
     # Step to install repo tool
     - name: Install repo tool
       run: |
