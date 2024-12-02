@@ -16,11 +16,6 @@ By flashing this kernel, **YOU** are choosing to make these modifications. If so
 
 # Installation instructions: 
 
-You can flash this kernel with the open-source Kernel Flasher app.  
-For more information, check the app's [GitHub repository](https://github.com/capntrips/KernelFlasher).
-
-### Steps to Install:
-
 Follow the steps for GKI:  
 [Installation](https://kernelsu.org/guide/installation.html)
 
