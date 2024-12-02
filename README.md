@@ -21,7 +21,7 @@ For more information, check the app's [GitHub repository](https://github.com/cap
 
 ### Steps to Install:
 
-Follow the steps for GKI:
+Follow the steps for GKI:  
 [Installation](https://kernelsu.org/guide/installation.html)
 
 ---
