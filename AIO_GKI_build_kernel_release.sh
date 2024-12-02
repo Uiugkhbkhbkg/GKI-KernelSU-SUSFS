@@ -212,11 +212,8 @@ RELEASE_NAME="GKI Kernels With KernelSU & SUSFS"
 RELEASE_NOTES="This release contains the following builds:
 $(printf '%s\n' "${ZIP_FILES[@]}")"
 
-# Authenticate GitHub CLI
+# Authenticate GitHub CLI using the existing environment variable
 echo "Authenticating with GitHub CLI..."
-echo "$GH_TOKEN" | gh auth login --with-token
-
-# Check if authentication was successful
 gh auth status
 
 # Create the GitHub release
