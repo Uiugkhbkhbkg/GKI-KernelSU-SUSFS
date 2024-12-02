@@ -55,10 +55,13 @@ Flashing this kernel will void your warranty, and there is always a risk of bric
 ### Google
 + Pixel 8
 + Pixel 8 Pro
+### OnePlus 
++ 11 5G
 ### Samsung
 + Galaxy S22
 ### Xiaomi 
 + Redmi K60
++ Redmi K60 Ultra
 + 13 Pro
   
 If you flash this and it works please let me know so i can add your device!
