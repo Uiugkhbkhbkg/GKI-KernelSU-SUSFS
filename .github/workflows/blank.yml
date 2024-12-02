@@ -29,6 +29,12 @@ jobs:
         sudo curl https://storage.googleapis.com/git-repo-downloads/repo -o /usr/local/bin/repo
         sudo chmod a+x /usr/local/bin/repo
     
+    # Authenticate GitHub CLI with GH_TOKEN
+    - name: Authenticate GitHub CLI
+      env:
+        GH_TOKEN: ${{ secrets.NEURAX }}
+      run: gh auth login --with-token
+    
     # Run the build script
     - name: AIO_GKI_build_kernel
       run: chmod +x AIO_GKI_build_kernel_release.sh && ./AIO_GKI_build_kernel_release.sh
@@ -38,12 +44,23 @@ jobs:
         echo "Add other actions to build,"
         echo "test, and deploy your project."
     
-    # Set up GitHub CLI with GH_TOKEN
-    - name: Set up GitHub CLI
+    # Create the GitHub release
+    - name: Create GitHub release
       env:
         GH_TOKEN: ${{ secrets.NEURAX }}
       run: |
-        gh auth login --with-token <<EOF
-        ${{ secrets.NEURAX }}
-        EOF
-        gh release create "GKI Kernels With KernelSU & SUSFS"
+        ZIP_FILES=($(find ./ -type f -name "*.zip"))
+        REPO_OWNER="Uiugkhbkhbkg"
+        REPO_NAME="GKI-KernelSU-SUSFS"
+        TAG_NAME="v$(date +'%Y.%m.%d-%H%M%S')"
+        RELEASE_NAME="GKI Kernels With KernelSU & SUSFS"
+        RELEASE_NOTES="This release contains the following builds: $(printf '%s\n' "${ZIP_FILES[@]}")"
+        
+        echo "Creating GitHub release: $RELEASE_NAME..."
+        gh release create "$TAG_NAME" "${ZIP_FILES[@]}" \
+            --repo "$REPO_OWNER/$REPO_NAME" \
+            --title "$RELEASE_NAME" \
+            --notes "$RELEASE_NOTES"
+        
+        echo "GitHub release created with the following files:"
+        printf '%s\n' "${ZIP_FILES[@]}"
