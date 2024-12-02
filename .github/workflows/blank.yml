@@ -19,10 +19,8 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y python3 git curl
-        curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
-        chmod a+x ~/bin/repo
-        echo 'export PATH=$HOME/bin:$PATH' >> ~/.bashrc
-        source ~/.bashrc
+        sudo curl https://storage.googleapis.com/git-repo-downloads/repo -o /usr/local/bin/repo
+        sudo chmod a+x /usr/local/bin/repo
     
     # Run the build script
     - name: AIO_GKI_build_kernel
