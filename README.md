@@ -16,22 +16,8 @@ By flashing this kernel, **YOU** are choosing to make these modifications. If so
 
 # Installation instructions: 
 
-You can flash this kernel with the open-source Kernel Flasher app.  
-For more information, check the app's [GitHub repository](https://github.com/capntrips/KernelFlasher).
-
-### Steps to Install:
-
-1. **Download the Kernel**:  
-   Download the appropriate kernel zip file from the [releases section](link-to-releases).
-
-2. **Install Kernel Flasher**:  
-   Download and install the [Kernel Flasher app](https://github.com/capntrips/KernelFlasher) on your device.
-
-3. **Flash the Kernel**:  
-   Open the Kernel Flasher app and select the downloaded kernel zip file. Follow the on-screen instructions to flash the kernel to your device.
-
-4. **Reboot**:  
-   After flashing, reboot your device to apply the changes.
+Follow the steps for GKI:  
+[Installation](https://kernelsu.org/guide/installation.html)
 
 ---
 
@@ -69,7 +55,11 @@ Flashing this kernel will void your warranty, and there is always a risk of bric
 ### Google
 + Pixel 8
 + Pixel 8 Pro
+### Samsung
++ Galaxy S22
 ### Xiaomi 
 + Redmi K60
++ 13 Pro
+  
 If you flash this and it works please let me know so i can add your device!
 
