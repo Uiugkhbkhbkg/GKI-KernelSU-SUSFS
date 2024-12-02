@@ -62,3 +62,14 @@ If you encounter any issues or need help, feel free to open an issue in this rep
 Flashing this kernel will void your warranty, and there is always a risk of bricking your device. Please make sure to back up your data and ensure you understand the risks before proceeding.
 
 **Proceed at your own risk!**
+
+---
+
+# Confirmed Working Devices
+### Google
++ Pixel 8
++ Pixel 8 Pro
+### Xiaomi 
++ Redmi K60
+If you flash this and it works please let me know so i can add your device!
+
