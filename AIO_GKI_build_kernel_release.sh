@@ -182,6 +182,10 @@ build_config() {
     rm -rf "$CONFIG"
 }
 
+# Authenticate GitHub CLI using the existing environment variable
+echo "Authenticating with GitHub CLI..."
+echo "${{ secrets.NEURAX }}" | gh auth login --with-token
+
 # Concurrent build management
 JOBS=()
 for CONFIG in "${BUILD_CONFIGS[@]}"; do
@@ -211,10 +215,6 @@ TAG_NAME="v$(date +'%Y.%m.%d-%H%M%S')"
 RELEASE_NAME="GKI Kernels With KernelSU & SUSFS"
 RELEASE_NOTES="This release contains the following builds:
 $(printf '%s\n' "${ZIP_FILES[@]}")"
-
-# Authenticate GitHub CLI using the existing environment variable
-echo "Authenticating with GitHub CLI..."
-gh auth status
 
 # Create the GitHub release
 echo "Creating GitHub release: $RELEASE_NAME..."
