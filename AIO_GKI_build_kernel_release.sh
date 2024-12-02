@@ -3,7 +3,7 @@
 # Exit immediately if a command exits with a non-zero status
 set -e
 
-# Maximum number of concurrent builds
+#DO NOT GO OVER 4
 MAX_CONCURRENT_BUILDS=4
 
 # Check if 'builds' folder exists, create it if not
@@ -11,7 +11,9 @@ if [ ! -d "./builds" ]; then
     echo "'builds' folder not found. Creating it..."
     mkdir -p ./builds
 else
-    echo "'builds' folder already exists."
+    echo "'builds' folder already exists removing it."
+    rm -rf ./builds
+    mkdir -p ./builds
 fi
 
 cd ./builds
@@ -35,12 +37,14 @@ BUILD_CONFIGS=(
     "android13-5.10-214-2024-07"
     "android13-5.10-218-2024-08"
 
+    "android13-5.15-94-2023-05"
     "android13-5.15-123-2023-11"
     "android13-5.15-137-2024-01"
     "android13-5.15-144-2024-03"
     "android13-5.15-148-2024-05"
     "android13-5.15-149-2024-07"
     "android13-5.15-151-2024-08"
+    "android13-5.15-167-2024-11"
     
     "android14-5.15-131-2023-11"
     "android14-5.15-137-2024-01"
@@ -49,7 +53,8 @@ BUILD_CONFIGS=(
     "android14-5.15-149-2024-06"
     "android14-5.15-153-2024-07"
     "android14-5.15-158-2024-08"
-    
+    "android14-5.15-167-2024-11"
+
     "android14-6.1-25-2023-10"
     "android14-6.1-43-2023-11"
     "android14-6.1-57-2024-01"
@@ -58,10 +63,10 @@ BUILD_CONFIGS=(
     "android14-6.1-78-2024-06"
     "android14-6.1-84-2024-07"
     "android14-6.1-90-2024-08"
+    "android14-6.1-112-2024-11"
     
     #"android15-6.6-30-2024-08"
 )
-
 
 # Arrays to store generated zip files, grouped by androidversion-kernelversion
 declare -A RELEASE_ZIPS=()
@@ -82,31 +87,11 @@ build_config() {
     # Formatted branch name for each build (e.g., android14-5.15-2024-01)
     FORMATTED_BRANCH="${ANDROID_VERSION}-${KERNEL_VERSION}-${DATE}"
 
-     # Log file for this build in case of failure
+    # Log file for this build in case of failure
     LOG_FILE="../${CONFIG}_build.log"
-    echo "Starting build for $CONFIG using branch $FORMATTED_BRANCH..."
-
-    # Function to capture errors and log them
-    handle_failure() {
-        if [ $? -ne 0 ]; then
-            echo "Build failed for $CONFIG. Saving logs to $LOG_FILE."
-            exec &> "$LOG_FILE"  # Redirect all future output to the log file
-            echo "== ERROR LOG FOR $CONFIG =="
-
-            # Run cleanup actions if needed
-            echo "Cleaning up failed build directory..."
-            rm -rf "$CONFIG"  # Example cleanup action
-
-            echo "Logs saved to $LOG_FILE."
-        fi
-    }
-
-    # Set a trap to handle errors
-    trap 'handle_failure' ERR
 
     echo "Starting build for $CONFIG using branch $FORMATTED_BRANCH..."
-
-       # Check if AnyKernel3 repo exists, remove it if it does
+    # Check if AnyKernel3 repo exists, remove it if it does
     if [ -d "./AnyKernel3" ]; then
         echo "Removing existing AnyKernel3 directory..."
         rm -rf ./AnyKernel3
@@ -178,30 +163,105 @@ build_config() {
     # Build kernel
     echo "Building kernel for $CONFIG..."
 
+    export CC="ccache clang"
+    export CXX="ccache clang++"
+
     # Check if build.sh exists, if it does, run the default build script
     if [ -e build/build.sh ]; then
         echo "build.sh found, running default build script..."
         # Modify config files for the default build process
         sed -i '2s/check_defconfig//' ./common/build.config.gki
-        sed -i "s/dirty/''/g" ./common/scripts/setlocalversion
+        sed -i "s/dirty/'Wild+'/g" ./common/scripts/setlocalversion
         LTO=thin BUILD_CONFIG=common/build.config.gki.aarch64 build/build.sh
     
-        # Instead of copying to AnyKernel3 outside, copy within the current config directory
+        # Copying to AnyKernel3
         echo "Copying Image.lz4 to $CONFIG/AnyKernel3..."
-        cp ./out/${ANDROID_VERSION}-${KERNEL_VERSION}/dist/Image.lz4 ../AnyKernel3/Image.lz4
+        cp ./out/${ANDROID_VERSION}-${KERNEL_VERSION}/dist/Image ../AnyKernel3/Image
+        # Check if the boot.img file exists
+        if [ -f "./out/${ANDROID_VERSION}-${KERNEL_VERSION}/dist/boot.img" ]; then
+            cp ./out/${ANDROID_VERSION}-${KERNEL_VERSION}/dist/boot.img ../../${ANDROID_VERSION}-${KERNEL_VERSION}.${SUB_LEVEL}_${DATE}-boot.img
+            cp ./out/${ANDROID_VERSION}-${KERNEL_VERSION}/dist/boot-lz4.img ../../${ANDROID_VERSION}-${KERNEL_VERSION}.${SUB_LEVEL}_${DATE}-boot-lz4.img
+            cp ./out/${ANDROID_VERSION}-${KERNEL_VERSION}/dist/boot-gz.img ../../${ANDROID_VERSION}-${KERNEL_VERSION}.${SUB_LEVEL}_${DATE}-boot-gz.img
+        else
+            if [ "$ANDROID_VERSION" = "android12" ]; then
+                mkdir bootimgs
+                cp ./out/${ANDROID_VERSION}-${KERNEL_VERSION}/dist/Image ./bootimgs
+                cp ./out/${ANDROID_VERSION}-${KERNEL_VERSION}/dist/Image.lz4 ./bootimgs
+                cd ./bootimgs
+                
+                GKI_URL=https://dl.google.com/android/gki/gki-certified-boot-android12-5.10-"${DATE}"_r1.zip
+                FALLBACK_URL=https://dl.google.com/android/gki/gki-certified-boot-android12-5.10-2023-01_r1.zip
+                status=$(curl -sL -w "%{http_code}" "$GKI_URL" -o /dev/null)
+                
+                if [ "$status" = "200" ]; then
+                    curl -Lo gki-kernel.zip "$GKI_URL"
+                else
+                    echo "[+] $GKI_URL not found, using $FALLBACK_URL"
+                    curl -Lo gki-kernel.zip "$FALLBACK_URL"
+                fi
+                
+                unzip gki-kernel.zip && rm gki-kernel.zip
+                echo 'Unpack prebuilt boot.img'
+                unpack_bootimg.py --boot_img="./boot-5.10.img"
+                
+                echo 'Building Image.gz'
+                gzip -n -k -f -9 Image >Image.gz
+                
+                echo 'Building boot.img'
+                mkbootimg.py --header_version 4 --kernel Image --output boot.img --ramdisk out/ramdisk --os_version 12.0.0 --os_patch_level "${DATE}"
+                avbtool.py add_hash_footer --partition_name boot --partition_size $((64 * 1024 * 1024)) --image boot.img --algorithm SHA256_RSA2048 --key /home/james/keys/testkey_rsa2048.pem
+                cp ./boot.img ../../../${ANDROID_VERSION}-${KERNEL_VERSION}.${SUB_LEVEL}_${DATE}-boot.img
+                
+                echo 'Building boot-gz.img'
+                mkbootimg.py --header_version 4 --kernel Image.gz --output boot-gz.img --ramdisk out/ramdisk --os_version 12.0.0 --os_patch_level "${DATE}"
+            	avbtool.py add_hash_footer --partition_name boot --partition_size $((64 * 1024 * 1024)) --image boot-gz.img --algorithm SHA256_RSA2048 --key /home/james/keys/testkey_rsa2048.pem
+                cp ./boot-gz.img ../../../${ANDROID_VERSION}-${KERNEL_VERSION}.${SUB_LEVEL}_${DATE}-boot-gz.img
+
+                echo 'Building boot-lz4.img'
+                mkbootimg.py --header_version 4 --kernel Image.lz4 --output boot-lz4.img --ramdisk out/ramdisk --os_version 12.0.0 --os_patch_level "${DATE}"
+                avbtool.py add_hash_footer --partition_name boot --partition_size $((64 * 1024 * 1024)) --image boot-lz4.img --algorithm SHA256_RSA2048 --key /home/james/keys/testkey_rsa2048.pem
+                cp ./boot-lz4.img ../../../${ANDROID_VERSION}-${KERNEL_VERSION}.${SUB_LEVEL}_${DATE}-boot-lz4.img
+                cd ..
+
+            elif [ "$ANDROID_VERSION" = "android13" ]; then
+                mkdir bootimgs
+                cp ./out/${ANDROID_VERSION}-${KERNEL_VERSION}/dist/Image ./bootimgs
+                cp ./out/${ANDROID_VERSION}-${KERNEL_VERSION}/dist/Image.lz4 ./bootimgs
+                cd ./bootimgs
+
+                echo 'Building boot.img'
+                mkbootimg.py --header_version 4 --kernel Image --output boot.img
+                avbtool.py add_hash_footer --partition_name boot --partition_size $((64 * 1024 * 1024)) --image boot.img --algorithm SHA256_RSA2048 --key /home/james/keys/testkey_rsa2048.pem
+                cp ./boot.img ../../../${ANDROID_VERSION}-${KERNEL_VERSION}.${SUB_LEVEL}_${DATE}-boot.img
+                
+                echo 'Building boot-gz.img'
+                mkbootimg.py --header_version 4 --kernel Image.gz --output boot-gz.img
+            	avbtool.py add_hash_footer --partition_name boot --partition_size $((64 * 1024 * 1024)) --image boot-gz.img --algorithm SHA256_RSA2048 --key /home/james/keys/testkey_rsa2048.pem
+                cp ./boot-gz.img ../../../${ANDROID_VERSION}-${KERNEL_VERSION}.${SUB_LEVEL}_${DATE}-boot-gz.img
+
+                echo 'Building boot-lz4.img'
+                mkbootimg.py --header_version 4 --kernel Image.lz4 --output boot-lz4.imm
+                avbtool.py add_hash_footer --partition_name boot --partition_size $((64 * 1024 * 1024)) --image boot-lz4.img --algorithm SHA256_RSA2048 --key /home/james/keys/testkey_rsa2048.pem
+                cp ./boot-lz4.img ../../../${ANDROID_VERSION}-${KERNEL_VERSION}.${SUB_LEVEL}_${DATE}-boot-lz4.img
+                cd ..
+            fi
+        fi
     else
         echo "build.sh found, using it for build..."
         # Use Bazel build if build.sh exists
         echo "Running Bazel build..."
-        sed -i "/stable_scmversion_cmd/s/-maybe-dirty/+/g" ./build/kernel/kleaf/impl/stamp.bzl
+        sed -i "/stable_scmversion_cmd/s/-maybe-dirty/-Wild+/g" ./build/kernel/kleaf/impl/stamp.bzl
         sed -i '2s/check_defconfig//' ./common/build.config.gki
         rm -rf ./common/android/abi_gki_protected_exports_aarch64
         rm -rf ./common/android/abi_gki_protected_exports_x86_64
         tools/bazel build --config=fast //common:kernel_aarch64_dist
 
-        # Instead of copying to AnyKernel3 outside, copy within the current config directory
-        echo "Copying Image.lz4 to $CONFIG/AnyKernel3..."
-        cp ./bazel-bin/common/kernel_aarch64/Image.lz4 ../AnyKernel3/Image.lz4
+        # Copying to AnyKernel3
+        echo "Copying Image to $CONFIG/AnyKernel3..."
+        cp ./bazel-bin/common/kernel_aarch64/Image ../AnyKernel3/Image
+        cp ./bazel-bin/common/kernel_aarch64_gki_artifacts/boot.img ../../${ANDROID_VERSION}-${KERNEL_VERSION}.${SUB_LEVEL}_${DATE}-boot.img
+        cp ./bazel-bin/common/kernel_aarch64_gki_artifacts/boot-gz.img ../../${ANDROID_VERSION}-${KERNEL_VERSION}.${SUB_LEVEL}_${DATE}-boot-gz.img
+        cp ./bazel-bin/common/kernel_aarch64_gki_artifacts/boot-lz4.img ../../${ANDROID_VERSION}-${KERNEL_VERSION}.${SUB_LEVEL}_${DATE}-boot-lz4.img
     fi
 
     # Create zip in the same directory
@@ -211,7 +271,6 @@ build_config() {
     zip -r "../../$ZIP_NAME" ./*
     cd ../../
 
-    # Group the zip file by Android and Kernel version
     RELEASE_ZIPS["$ANDROID_VERSION-$KERNEL_VERSION.$SUB_LEVEL"]+="./$ZIP_NAME "
 
     # Delete the $CONFIG folder after building
@@ -220,42 +279,37 @@ build_config() {
 }
 
 # Concurrent build management
-JOBS=()
 for CONFIG in "${BUILD_CONFIGS[@]}"; do
-    build_config "$CONFIG" &  # Start the build in the background
-    JOBS+=($!)               # Track the background job ID
+    # Start the build process in the background
+    build_config "$CONFIG" &
 
-    # Limit the number of concurrent builds
-    while [ "$(jobs -r | wc -l)" -ge "$MAX_CONCURRENT_BUILDS" ]; do
-        sleep 1
+    # Limit concurrent jobs to $MAX_CONCURRENT_BUILDS
+    while (( $(jobs -r | wc -l) >= MAX_CONCURRENT_BUILDS )); do
+        sleep 1  # Check every second for free slots
     done
 done
 
-# Wait for all jobs to finish
-for JOB in "${JOBS[@]}"; do
-    wait "$JOB"
-done
+wait
 
 echo "Build process complete."
 
-# Collect all zip files
-ZIP_FILES=($(find ./ -type f -name "*.zip"))
+# Collect all zip and img files
+FILES=($(find ./ -type f \( -name "*.zip" -o -name "*.img" \)))
 
 # GitHub repository details
 REPO_OWNER="TheWildJames"
 REPO_NAME="GKI-KernelSU-SUSFS"
 TAG_NAME="v$(date +'%Y.%m.%d-%H%M%S')"
-RELEASE_NAME="GKI Kernels With KernelSU & SUSFS"
-RELEASE_NOTES="This release contains the following builds:
-$(printf '%s\n' "${ZIP_FILES[@]}")"
+RELEASE_NAME="GKI Kernels With KernelSU & SUSFS v1.5.2"
+RELEASE_NOTES="This release contains KernelSU and SUSFS v1.5.2"
 
 # Create the GitHub release
 echo "Creating GitHub release: $RELEASE_NAME..."
-gh release create "$TAG_NAME" "${ZIP_FILES[@]}" \
+gh release create "$TAG_NAME" "${FILES[@]}" \
     --repo "$REPO_OWNER/$REPO_NAME" \
     --title "$RELEASE_NAME" \
     --notes "$RELEASE_NOTES"
 
 echo "GitHub release created with the following files:"
-printf '%s\n' "${ZIP_FILES[@]}"
+printf '%s\n' "${FILES[@]}"
 
