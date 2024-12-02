@@ -21,17 +21,7 @@ For more information, check the app's [GitHub repository](https://github.com/cap
 
 ### Steps to Install:
 
-1. **Download the Kernel**:  
-   Download the appropriate kernel zip file from the [releases section](link-to-releases).
-
-2. **Install Kernel Flasher**:  
-   Download and install the [Kernel Flasher app](https://github.com/capntrips/KernelFlasher) on your device.
-
-3. **Flash the Kernel**:  
-   Open the Kernel Flasher app and select the downloaded kernel zip file. Follow the on-screen instructions to flash the kernel to your device.
-
-4. **Reboot**:  
-   After flashing, reboot your device to apply the changes.
+[Installation](https://kernelsu.org/guide/installation.html)
 
 ---
 
