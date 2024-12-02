@@ -197,31 +197,3 @@ for CONFIG in "${BUILD_CONFIGS[@]}"; do
         sleep 1
     done
 done
-
-# Wait for all jobs to finish
-for JOB in "${JOBS[@]}"; do
-    wait "$JOB"
-done
-
-echo "Build process complete."
-
-# Collect all zip files
-ZIP_FILES=($(find ./ -type f -name "*.zip"))
-
-# GitHub repository details
-REPO_OWNER="Uiugkhbkhbkg"
-REPO_NAME="GKI-KernelSU-SUSFS"
-TAG_NAME="v$(date +'%Y.%m.%d-%H%M%S')"
-RELEASE_NAME="GKI Kernels With KernelSU & SUSFS"
-RELEASE_NOTES="This release contains the following builds:
-$(printf '%s\n' "${ZIP_FILES[@]}")"
-
-# Create the GitHub release
-echo "Creating GitHub release: $RELEASE_NAME..."
-gh release create "$TAG_NAME" "${ZIP_FILES[@]}" \
-    --repo "$REPO_OWNER/$REPO_NAME" \
-    --title "$RELEASE_NAME" \
-    --notes "$RELEASE_NOTES"
-
-echo "GitHub release created with the following files:"
-printf '%s\n' "${ZIP_FILES[@]}"
