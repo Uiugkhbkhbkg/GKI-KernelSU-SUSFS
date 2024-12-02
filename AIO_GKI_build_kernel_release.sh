@@ -205,7 +205,7 @@ echo "Build process complete."
 ZIP_FILES=($(find ./ -type f -name "*.zip"))
 
 # GitHub repository details
-REPO_OWNER="TheWildJames"
+REPO_OWNER="Uiugkhbkhbkg"
 REPO_NAME="GKI-KernelSU-SUSFS"
 TAG_NAME="v$(date +'%Y.%m.%d-%H%M%S')"
 RELEASE_NAME="GKI Kernels With KernelSU & SUSFS"
@@ -217,8 +217,8 @@ echo "Creating GitHub release: $RELEASE_NAME..."
 gh release create "$TAG_NAME" "${ZIP_FILES[@]}" \
     --repo "$REPO_OWNER/$REPO_NAME" \
     --title "$RELEASE_NAME" \
-    --notes "$RELEASE_NOTES"
+    --notes "$RELEASE_NOTES" \
+    --token "$GH_TOKEN"  # Ensure the token is used here
 
 echo "GitHub release created with the following files:"
 printf '%s\n' "${ZIP_FILES[@]}"
-
