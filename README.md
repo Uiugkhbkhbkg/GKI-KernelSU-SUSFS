@@ -71,5 +71,6 @@ Flashing this kernel will void your warranty, and there is always a risk of bric
 + Pixel 8 Pro
 ### Xiaomi 
 + Redmi K60
++ 13 Pro
 If you flash this and it works please let me know so i can add your device!
 
