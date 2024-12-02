@@ -51,6 +51,18 @@ Flashing this kernel will void your warranty, and there is always a risk of bric
 
 ---
 
+# To-DO
+
+- [X] Build AnyKernel3 zips
+- [X] Add boot.imgs
+- [ ] Make GitHub Actions
+- [ ] Add more devices (Never going to end 😄)
+
+
+---
+
+# If you need you kernel version added please let me know and I will build it!
+
 # Confirmed Working Devices
 ### Google
 + Pixel 8
