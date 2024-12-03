@@ -176,28 +176,26 @@ build_config() {
     
         # Copying to AnyKernel3
         echo "Copying Image.lz4 to $CONFIG/AnyKernel3..."
-        cp ./out/${ANDROID_VERSION}-${KERNEL_VERSION}/dist/Image ../AnyKernel3/Image
+
         # Check if the boot.img file exists
-        if [ -f "./out/${ANDROID_VERSION}-${KERNEL_VERSION}/dist/boot.img" ]; then
-            cp ./out/${ANDROID_VERSION}-${KERNEL_VERSION}/dist/boot.img ../../${ANDROID_VERSION}-${KERNEL_VERSION}.${SUB_LEVEL}_${DATE}-boot.img
-            cp ./out/${ANDROID_VERSION}-${KERNEL_VERSION}/dist/boot-lz4.img ../../${ANDROID_VERSION}-${KERNEL_VERSION}.${SUB_LEVEL}_${DATE}-boot-lz4.img
-            cp ./out/${ANDROID_VERSION}-${KERNEL_VERSION}/dist/boot-gz.img ../../${ANDROID_VERSION}-${KERNEL_VERSION}.${SUB_LEVEL}_${DATE}-boot-gz.img
-        else
-            if [ "$ANDROID_VERSION" = "android12" ]; then
-                mkdir bootimgs
-                cp ./out/${ANDROID_VERSION}-${KERNEL_VERSION}/dist/Image ./bootimgs
-                cp ./out/${ANDROID_VERSION}-${KERNEL_VERSION}/dist/Image.lz4 ./bootimgs
-                cd ./bootimgs
+        if [ "$ANDROID_VERSION" = "android12" ]; then
+            mkdir bootimgs
+            cp ./out/${ANDROID_VERSION}-${KERNEL_VERSION}/dist/Image ./bootimgs
+            cp ./out/${ANDROID_VERSION}-${KERNEL_VERSION}/dist/Image.lz4 ./bootimgs
+            cp ./out/${ANDROID_VERSION}-${KERNEL_VERSION}/dist/Image ../
+            cp ./out/${ANDROID_VERSION}-${KERNEL_VERSION}/dist/Image.lz4 ../
+            gzip -n -k -f -9 ./out/${ANDROID_VERSION}-${KERNEL_VERSION}/dist/Image >../Image.gz
+            cd ./bootimgs
+            
+            GKI_URL=https://dl.google.com/android/gki/gki-certified-boot-android12-5.10-"${DATE}"_r1.zip
+            FALLBACK_URL=https://dl.google.com/android/gki/gki-certified-boot-android12-5.10-2023-01_r1.zip
+            status=$(curl -sL -w "%{http_code}" "$GKI_URL" -o /dev/null)
                 
-                GKI_URL=https://dl.google.com/android/gki/gki-certified-boot-android12-5.10-"${DATE}"_r1.zip
-                FALLBACK_URL=https://dl.google.com/android/gki/gki-certified-boot-android12-5.10-2023-01_r1.zip
-                status=$(curl -sL -w "%{http_code}" "$GKI_URL" -o /dev/null)
-                
-                if [ "$status" = "200" ]; then
-                    curl -Lo gki-kernel.zip "$GKI_URL"
-                else
-                    echo "[+] $GKI_URL not found, using $FALLBACK_URL"
-                    curl -Lo gki-kernel.zip "$FALLBACK_URL"
+            if [ "$status" = "200" ]; then
+                curl -Lo gki-kernel.zip "$GKI_URL"
+            else
+                echo "[+] $GKI_URL not found, using $FALLBACK_URL"
+                curl -Lo gki-kernel.zip "$FALLBACK_URL"
                 fi
                 
                 unzip gki-kernel.zip && rm gki-kernel.zip
@@ -223,31 +221,35 @@ build_config() {
                 cp ./boot-lz4.img ../../../${ANDROID_VERSION}-${KERNEL_VERSION}.${SUB_LEVEL}_${DATE}-boot-lz4.img
                 cd ..
 
-            elif [ "$ANDROID_VERSION" = "android13" ]; then
-                mkdir bootimgs
-                cp ./out/${ANDROID_VERSION}-${KERNEL_VERSION}/dist/Image ./bootimgs
-                cp ./out/${ANDROID_VERSION}-${KERNEL_VERSION}/dist/Image.lz4 ./bootimgs
-                cd ./bootimgs
+        elif [ "$ANDROID_VERSION" = "android13" ]; then
+            mkdir bootimgs
+            cp ./out/${ANDROID_VERSION}-${KERNEL_VERSION}/dist/Image ./bootimgs
+            cp ./out/${ANDROID_VERSION}-${KERNEL_VERSION}/dist/Image.lz4 ./bootimgs
+            cp ./out/${ANDROID_VERSION}-${KERNEL_VERSION}/dist/Image ../
+            cp ./out/${ANDROID_VERSION}-${KERNEL_VERSION}/dist/Image.lz4 ../
+            gzip -n -k -f -9 ./out/${ANDROID_VERSION}-${KERNEL_VERSION}/dist/Image >../Image.gz
+            cd ./bootimgs
 
-                echo 'Building boot.img'
-                mkbootimg.py --header_version 4 --kernel Image --output boot.img
-                avbtool.py add_hash_footer --partition_name boot --partition_size $((64 * 1024 * 1024)) --image boot.img --algorithm SHA256_RSA2048 --key /home/james/keys/testkey_rsa2048.pem
-                cp ./boot.img ../../../${ANDROID_VERSION}-${KERNEL_VERSION}.${SUB_LEVEL}_${DATE}-boot.img
-                
-                echo 'Building boot-gz.img'
-                mkbootimg.py --header_version 4 --kernel Image.gz --output boot-gz.img
-            	avbtool.py add_hash_footer --partition_name boot --partition_size $((64 * 1024 * 1024)) --image boot-gz.img --algorithm SHA256_RSA2048 --key /home/james/keys/testkey_rsa2048.pem
-                cp ./boot-gz.img ../../../${ANDROID_VERSION}-${KERNEL_VERSION}.${SUB_LEVEL}_${DATE}-boot-gz.img
+            echo 'Building Image.gz'
+            gzip -n -k -f -9 Image >Image.gz
 
-                echo 'Building boot-lz4.img'
-                mkbootimg.py --header_version 4 --kernel Image.lz4 --output boot-lz4.imm
-                avbtool.py add_hash_footer --partition_name boot --partition_size $((64 * 1024 * 1024)) --image boot-lz4.img --algorithm SHA256_RSA2048 --key /home/james/keys/testkey_rsa2048.pem
-                cp ./boot-lz4.img ../../../${ANDROID_VERSION}-${KERNEL_VERSION}.${SUB_LEVEL}_${DATE}-boot-lz4.img
-                cd ..
-            fi
+            echo 'Building boot.img'
+            mkbootimg.py --header_version 4 --kernel Image --output boot.img
+            avbtool.py add_hash_footer --partition_name boot --partition_size $((64 * 1024 * 1024)) --image boot.img --algorithm SHA256_RSA2048 --key /home/james/keys/testkey_rsa2048.pem
+            cp ./boot.img ../../../${ANDROID_VERSION}-${KERNEL_VERSION}.${SUB_LEVEL}_${DATE}-boot.img
+            
+            echo 'Building boot-gz.img'
+            mkbootimg.py --header_version 4 --kernel Image.gz --output boot-gz.img
+        	avbtool.py add_hash_footer --partition_name boot --partition_size $((64 * 1024 * 1024)) --image boot-gz.img --algorithm SHA256_RSA2048 --key /home/james/keys/testkey_rsa2048.pem
+            cp ./boot-gz.img ../../../${ANDROID_VERSION}-${KERNEL_VERSION}.${SUB_LEVEL}_${DATE}-boot-gz.img
+
+            echo 'Building boot-lz4.img'
+            mkbootimg.py --header_version 4 --kernel Image.lz4 --output boot-lz4.img
+            avbtool.py add_hash_footer --partition_name boot --partition_size $((64 * 1024 * 1024)) --image boot-lz4.img --algorithm SHA256_RSA2048 --key /home/james/keys/testkey_rsa2048.pem
+            cp ./boot-lz4.img ../../../${ANDROID_VERSION}-${KERNEL_VERSION}.${SUB_LEVEL}_${DATE}-boot-lz4.img
+            cd ..
         fi
     else
-        echo "build.sh found, using it for build..."
         # Use Bazel build if build.sh exists
         echo "Running Bazel build..."
         sed -i "/stable_scmversion_cmd/s/-maybe-dirty/-Wild+/g" ./build/kernel/kleaf/impl/stamp.bzl
@@ -258,7 +260,9 @@ build_config() {
 
         # Copying to AnyKernel3
         echo "Copying Image to $CONFIG/AnyKernel3..."
-        cp ./bazel-bin/common/kernel_aarch64/Image ../AnyKernel3/Image
+        cp ./bazel-bin/common/kernel_aarch64/Image ../Image
+        cp ./bazel-bin/common/kernel_aarch64/Image.lz4 ../Image.lz4
+        cp ./bazel-bin/common/kernel_aarch64/Image.gz ../Image.gz
         cp ./bazel-bin/common/kernel_aarch64_gki_artifacts/boot.img ../../${ANDROID_VERSION}-${KERNEL_VERSION}.${SUB_LEVEL}_${DATE}-boot.img
         cp ./bazel-bin/common/kernel_aarch64_gki_artifacts/boot-gz.img ../../${ANDROID_VERSION}-${KERNEL_VERSION}.${SUB_LEVEL}_${DATE}-boot-gz.img
         cp ./bazel-bin/common/kernel_aarch64_gki_artifacts/boot-lz4.img ../../${ANDROID_VERSION}-${KERNEL_VERSION}.${SUB_LEVEL}_${DATE}-boot-lz4.img
@@ -268,7 +272,19 @@ build_config() {
     cd ../AnyKernel3
     ZIP_NAME="AnyKernel3-${ANDROID_VERSION}-${KERNEL_VERSION}.${SUB_LEVEL}_${DATE}.zip"
     echo "Creating zip file: $ZIP_NAME..."
+    mv ../Image ./Image 
     zip -r "../../$ZIP_NAME" ./*
+    rm ./Image
+    ZIP_NAME="AnyKernel3-lz4-${ANDROID_VERSION}-${KERNEL_VERSION}.${SUB_LEVEL}_${DATE}.zip"
+    echo "Creating zip file: $ZIP_NAME..."
+    mv ../Image.lz4 ./Image.lz4 
+    zip -r "../../$ZIP_NAME" ./*
+    rm ./Image.lz4
+    ZIP_NAME="AnyKernel3-gz-${ANDROID_VERSION}-${KERNEL_VERSION}.${SUB_LEVEL}_${DATE}.zip"
+    echo "Creating zip file: $ZIP_NAME..."
+    mv ../Image.gz ./Image.gz 
+    zip -r "../../$ZIP_NAME" ./*
+    rm ./Image.gz
     cd ../../
 
     RELEASE_ZIPS["$ANDROID_VERSION-$KERNEL_VERSION.$SUB_LEVEL"]+="./$ZIP_NAME "
