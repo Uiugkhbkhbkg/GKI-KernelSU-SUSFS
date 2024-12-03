@@ -68,8 +68,8 @@ Flashing this kernel will void your warranty, and there is always a risk of bric
 
 # Confirmed Working Devices
 ### Google
++ Pixel 7 Pro
 + Pixel 8
-+ Pixel 8 Pro
 ### OnePlus 
 + 11 5G
 ### Samsung
