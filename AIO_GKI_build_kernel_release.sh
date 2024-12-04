@@ -270,7 +270,7 @@ echo "Build process complete."
 FILES=($(find ./ -type f \( -name "*.zip" -o -name "*.img" \)))
 
 # GitHub repository details
-REPO_OWNER="TheWildJames"
+REPO_OWNER="Uiugkhbkhbkg"
 REPO_NAME="GKI-KernelSU-SUSFS"
 TAG_NAME="v$(date +'%Y.%m.%d-%H%M%S')"
 RELEASE_NAME="GKI Kernels With KernelSU & SUSFS v1.5.2"
