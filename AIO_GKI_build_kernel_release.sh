@@ -3,7 +3,7 @@
 # Exit immediately if a command exits with a non-zero status
 set -e
 
-#DO NOT GO OVER 4
+# DO NOT GO OVER 4
 MAX_CONCURRENT_BUILDS=4
 
 # Check if 'builds' folder exists, create it if not
@@ -24,9 +24,16 @@ cd "$ROOT_DIR"
 
 # Array with configurations (e.g., android-version-kernel-version-date)
 BUILD_CONFIGS=(
-"android12-5.10-66-2023-10"
+    "android12-5.10-66-2023-10"
+)
+
 # Arrays to store generated zip files, grouped by androidversion-kernelversion
 declare -A RELEASE_ZIPS=()
+
+# Iterate over configurations
+build_config() {
+    CONFIG=$1
+    CONFIG_DETAILS=${CONFIG
 
 # Iterate over configurations
 build_config() {
