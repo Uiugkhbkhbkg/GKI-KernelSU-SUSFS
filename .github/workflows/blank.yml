@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    # Step to clean up disk space
+    - name: Clean up disk space
+      run: |
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /opt/ghc
+        sudo apt-get clean
+    
+    # Step to install repo tool
+    - name: Install repo tool
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y python3 git curl
+        sudo curl https://storage.googleapis.com/git-repo-downloads/repo -o /usr/local/bin/repo
+        sudo chmod a+x /usr/local/bin/repo
+    
+    # Run the build script
+    - name: AIO_GKI_build_kernel
+      run: chmod +x AIO_GKI_build_kernel_release.sh && ./AIO_GKI_build_kernel_release.sh
