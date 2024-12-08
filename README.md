@@ -39,7 +39,7 @@ Special thanks to the open-source community for their contributions!
 
 # Support
 
-If you encounter any issues or need help, feel free to open an issue in this repository or reach out to the community.
+If you encounter any issues or need help, feel free to open an issue in this repository or reach out to me.
 
 ---
 
